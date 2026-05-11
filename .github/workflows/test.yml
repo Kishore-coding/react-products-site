@@ -1,0 +1,67 @@
+name: Test CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+
+  pull_request:
+    branches:
+      - main
+
+    paths:
+      - src/** #it will trigger the workflow when any file in the src directory is changed
+
+  workflow_dispatch: # allows you to manually trigger the workflow
+
+  # when a release is created (only for main branch)
+  # this event is triggered when a release is created with a tag (v1.0.0, v1.0.1, etc.), you can also create a release from the GitHub UI
+  release:
+    types: [created]
+
+  # when an issue is opened, edited, deleted, or closed (only for stage branch) not for main branch
+  # issues event is mostly used for automating team communication and organization — not for building or deploying code.
+  issues:
+    types: [opened, edited, deleted, closed]
+
+    #more events are available in the documentation
+
+    
+jobs:
+  test:
+    if: github.event_name != 'issues'
+    name: TEST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: node setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Dependency
+        run: npm ci
+
+      - name: Lint Check
+        run: npm run lint
+
+      - name: Test 
+        run: npm run test
+
+  deploy:
+      if: github.event_name == 'push' || github.event_name == 'release'
+
+      name: deploy
+      runs-on: ubuntu-latest
+      needs: test
+
+
+      steps:
+        - name: deploy to vercel
+          run: echo "deploying..."
+
+  

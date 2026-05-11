@@ -2,13 +2,19 @@
 name: Deploy to Vercel
 
 # TRIGGER: When should this workflow run?
-# Answer: Every time you push code to the 'main' branch
 on:
   push:
     branches:
       - main
+      - stage
+  pull_request:
+    branches:
+      - main
+
 
 # JOBS: What should it do?
+#A job is a set of steps that run together on a machine (runner). Each job runs in its own runner environment.
+#A job can be defined in the workflow file or in a reusable workflow file.
 jobs:
   deploy:
     name: Build and Deploy
@@ -39,7 +45,6 @@ jobs:
         run: npm install -g vercel
 
       # Step 6: Deploy to Vercel using your secret keys
-      # ${{ secrets.X }} is how GitHub injects your secrets safely
       - name: Deploy to Vercel
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
